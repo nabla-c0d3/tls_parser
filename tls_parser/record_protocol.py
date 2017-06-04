@@ -4,10 +4,16 @@ from __future__ import print_function
 import struct
 from enum import Enum
 
-from tls_parser import TlsVersionEnum
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
 from typing import Tuple
 import tls_parser
+
+
+class TlsVersionEnum(Enum):
+    SSLV3 = 0
+    TLSV1 = 1
+    TLSV1_1 = 2
+    TLSV1_2 = 3
 
 
 class TlsRecordTlsVersionBytes(Enum):

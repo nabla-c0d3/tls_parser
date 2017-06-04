@@ -5,7 +5,7 @@ import struct
 
 from enum import Enum
 import tls_parser
-from tls_parser import TlsVersionEnum
+from tls_parser.record_protocol import TlsVersionEnum
 from typing import Tuple
 
 

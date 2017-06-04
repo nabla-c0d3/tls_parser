@@ -95,7 +95,7 @@ class TlsServerHelloDoneRecord(TlsHandshakeRecord):
 
     @classmethod
     def from_parameters(cls, tls_version):
-        # type: (tls_parser.TlsVersionEnum) -> TlsServerHelloDoneRecord
+        # type: (tls_parser.record_protocol.TlsVersionEnum) -> TlsServerHelloDoneRecord
         record_header = tls_parser.record_protocol.TlsRecordHeader(
             tls_parser.record_protocol.TlsRecordTypeByte.SERVER_DONE, tls_version, 0
         )
