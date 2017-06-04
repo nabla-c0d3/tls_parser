@@ -78,6 +78,8 @@ class TlsRecord(object):
         elif record_header.type in TlsRecordTypeByte:
             # Valid record type but we don't have the code to parse it right now
             record_data = raw_bytes[len_consumed:record_header.length]
+            if len(record_data) < record_header.length:
+                raise NotEnoughData()
             message = TlsSubprotocolMessage(record_data)
             return TlsRecord(record_header, message), len_consumed + record_header.length
         else:

@@ -22,6 +22,8 @@ class TlsHandshakeTypeByte(Enum):
 
 
 class TlsHandshakeMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
+    """The payload of a handshake record.
+    """
 
     def __init__(self, handshake_type, handshake_data):
         # type: (TlsHandshakeTypeByte, bytes) -> None
@@ -36,7 +38,10 @@ class TlsHandshakeMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
 
         handshake_type = TlsHandshakeTypeByte(struct.unpack('B', raw_bytes[0])[0])
         message_length = struct.unpack('!I', b'\x00' + raw_bytes[1:4])[0]
-        message = raw_bytes[4:message_length + 1]
+        message = raw_bytes[4:message_length+4]
+        if len(message) < message_length:
+            raise NotEnoughData()
+
         return TlsHandshakeMessage(handshake_type, message), 4 + message_length
 
     def to_bytes(self):
@@ -78,12 +83,14 @@ class TlsHandshakeRecord(tls_parser.record_protocol.TlsRecord):
         message, len_consumed_for_message = TlsHandshakeMessage.from_bytes(remaining_bytes)
         handshake_type = TlsHandshakeTypeByte(struct.unpack('B', remaining_bytes[0])[0])
         if handshake_type == TlsHandshakeTypeByte.SERVER_DONE:
-            return TlsServerHelloDoneRecord(header), len_consumed_for_message
+            parsed_record = TlsServerHelloDoneRecord(header)
         elif handshake_type in TlsHandshakeTypeByte:
             # Valid handshake type but we don't have the code to parse it right now
-            return TlsHandshakeRecord(header, message), len_consumed + len_consumed_for_message
+            parsed_record = TlsHandshakeRecord(header, message)
         else:
             raise UnknownTypeByte()
+
+        return parsed_record, len_consumed + len_consumed_for_message
 
 
 class TlsServerHelloDoneRecord(TlsHandshakeRecord):
@@ -110,3 +117,4 @@ class TlsServerHelloDoneRecord(TlsHandshakeRecord):
             raise UnknownTypeByte()
 
         return TlsServerHelloDoneRecord(parsed_record.record_header), len_consumed
+    
