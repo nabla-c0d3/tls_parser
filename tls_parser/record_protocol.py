@@ -6,7 +6,7 @@ from enum import Enum
 
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
 from typing import Tuple
-import tls_parser
+import tls_parser.handshake_protocol
 
 
 class TlsVersionEnum(Enum):

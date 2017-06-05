@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import struct
 from enum import Enum
-import tls_parser
+import tls_parser.record_protocol
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
 from typing import Tuple
 
@@ -113,8 +113,8 @@ class TlsServerHelloDoneRecord(TlsHandshakeRecord):
         # type: (bytes) -> Tuple[TlsServerHelloDoneRecord, int]
         parsed_record, len_consumed = super(TlsServerHelloDoneRecord, cls).from_bytes(raw_bytes)
 
-        if parsed_record.handshake_message.type != TlsHandshakeTypeByte.SERVER_DONE:
+        if parsed_record.subprotocol_message.handshake_type != TlsHandshakeTypeByte.SERVER_DONE:
             raise UnknownTypeByte()
 
-        return TlsServerHelloDoneRecord(parsed_record.record_header), len_consumed
+        return parsed_record, len_consumed
     
