@@ -44,7 +44,7 @@ class TlsRecordHeader(object):
         if len(raw_bytes) < 5:
             raise NotEnoughData()
 
-        record_type = TlsRecordTypeByte(struct.unpack('B', raw_bytes[0])[0])
+        record_type = TlsRecordTypeByte(struct.unpack('B', raw_bytes[0:1])[0])
         tls_version = TlsRecordTlsVersionBytes(raw_bytes[1:3])
         record_length = struct.unpack('!H', raw_bytes[3:5])[0]
         return TlsRecordHeader(record_type, tls_version, record_length), 5
@@ -53,7 +53,7 @@ class TlsRecordHeader(object):
         # type: () -> bytes
         bytes = b''
         # TLS Record type - 1 byte
-        bytes += struct.pack('B', self.type.value)
+        bytes += struct.pack('B', [self.type.value])
         # TLS version - 2 bytes
         bytes += TlsRecordTlsVersionBytes[self.tls_version.name].value
         # Length - 2 bytes

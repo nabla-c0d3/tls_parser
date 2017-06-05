@@ -30,7 +30,7 @@ class TlsHeartbeatMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
         # type: () -> bytes
         bytes = b''
         # Heartbeat message type - 1 byte
-        bytes += struct.pack('B', self.type.value)
+        bytes += struct.pack('B', [self.type.value])
         # Heartbeat message length - 2 bytes
         bytes += struct.pack('!H', len(self.data))
         # Heartbead message data

@@ -26,8 +26,8 @@ class TlsAlertMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
         if len(raw_bytes) < 2:
             raise NotEnoughData()
 
-        alert_severity = TlsAlertSeverityByte(struct.unpack('B', raw_bytes[0])[0])
-        alert_description = TlsAlertSeverityByte(struct.unpack('B', raw_bytes[1])[0])
+        alert_severity = TlsAlertSeverityByte(struct.unpack('B', raw_bytes[0:1])[0])
+        alert_description = TlsAlertSeverityByte(struct.unpack('B', raw_bytes[1:2])[0])
         return TlsAlertMessage(alert_severity, alert_description), 2
 
 

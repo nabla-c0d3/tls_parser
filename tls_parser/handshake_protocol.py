@@ -36,7 +36,7 @@ class TlsHandshakeMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
         if len(raw_bytes) < 4:
             raise NotEnoughData()
 
-        handshake_type = TlsHandshakeTypeByte(struct.unpack('B', raw_bytes[0])[0])
+        handshake_type = TlsHandshakeTypeByte(struct.unpack('B', raw_bytes[0:1])[0])
         message_length = struct.unpack('!I', b'\x00' + raw_bytes[1:4])[0]
         message = raw_bytes[4:message_length+4]
         if len(message) < message_length:
@@ -48,7 +48,7 @@ class TlsHandshakeMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
         # type: () -> bytes
         bytes = b''
         # TLS Handshake type - 1 byte
-        bytes += struct.pack('B', self.handshake_type.value)
+        bytes += struct.pack('B', [self.handshake_type.value])
         # TLS Handshake length - 3 bytes
         bytes += struct.pack('!I', len(self.handshake_data))[1:4]  # We only keep the first 3 out of 4 bytes
         # TLS Handshake message
@@ -81,7 +81,7 @@ class TlsHandshakeRecord(tls_parser.record_protocol.TlsRecord):
 
         # Try to parse the handshake record
         message, len_consumed_for_message = TlsHandshakeMessage.from_bytes(remaining_bytes)
-        handshake_type = TlsHandshakeTypeByte(struct.unpack('B', remaining_bytes[0])[0])
+        handshake_type = TlsHandshakeTypeByte(struct.unpack('B', remaining_bytes[0:1])[0])
         if handshake_type == TlsHandshakeTypeByte.SERVER_DONE:
             parsed_record = TlsServerHelloDoneRecord(header)
         elif handshake_type in TlsHandshakeTypeByte:
