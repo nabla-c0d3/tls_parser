@@ -8,3 +8,4 @@ install:
   - pip install -r requirements.txt
 # Command to run tests
 script: "python run_tests.py"
+
