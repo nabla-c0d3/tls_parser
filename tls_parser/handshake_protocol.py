@@ -5,6 +5,7 @@ import struct
 from enum import Enum
 import tls_parser.record_protocol
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
+from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple
 
 
@@ -102,7 +103,7 @@ class TlsServerHelloDoneRecord(TlsHandshakeRecord):
 
     @classmethod
     def from_parameters(cls, tls_version):
-        # type: (tls_parser.record_protocol.TlsVersionEnum) -> TlsServerHelloDoneRecord
+        # type: (TlsVersionEnum) -> TlsServerHelloDoneRecord
         record_header = tls_parser.record_protocol.TlsRecordHeader(
             tls_parser.record_protocol.TlsRecordTypeByte.SERVER_DONE, tls_version, 0
         )

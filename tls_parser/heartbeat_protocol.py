@@ -4,8 +4,8 @@ from __future__ import print_function
 import struct
 
 from enum import Enum
-import tls_parser
-from tls_parser.record_protocol import TlsVersionEnum
+import tls_parser.record_protocol
+from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple
 
 

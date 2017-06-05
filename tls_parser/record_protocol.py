@@ -5,15 +5,9 @@ import struct
 from enum import Enum
 
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
+from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple
 import tls_parser.handshake_protocol
-
-
-class TlsVersionEnum(Enum):
-    SSLV3 = 0
-    TLSV1 = 1
-    TLSV1_1 = 2
-    TLSV1_2 = 3
 
 
 class TlsRecordTlsVersionBytes(Enum):
