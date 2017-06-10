@@ -11,7 +11,9 @@ class TlsServerHelloDoneRecordTestCase(unittest.TestCase):
     SERVER_HELLO_DONE_BYTES = b'\x16\x03\x03\x00\x04\x0e\x00\x00\x00'
 
     def test_from_bytes(self):
-        self.assertTrue(TlsServerHelloDoneRecord.from_bytes(self.SERVER_HELLO_DONE_BYTES))
+        parsed_record, len_consumed = TlsServerHelloDoneRecord.from_bytes(self.SERVER_HELLO_DONE_BYTES)
+        self.assertEqual(parsed_record.subprotocol_message.handshake_type, TlsHandshakeTypeByte.SERVER_DONE)
+        self.assertEqual(len_consumed, len(self.SERVER_HELLO_DONE_BYTES))
 
 
 class TlsHandshakeRecordTestCase(unittest.TestCase):
