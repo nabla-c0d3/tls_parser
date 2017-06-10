@@ -2,14 +2,14 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import struct
-from enum import Enum
+from enum import IntEnum
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
 from tls_parser.record_protocol import TlsSubprotocolMessage, TlsRecord, TlsRecordHeader, TlsRecordTypeByte
 from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple
 
 
-class TlsHandshakeTypeByte(Enum):
+class TlsHandshakeTypeByte(IntEnum):
    HELLO_REQUEST = 0x00
    CLIENT_HELLO = 0x01
    SERVER_HELLO = 0x02
@@ -49,7 +49,7 @@ class TlsHandshakeMessage(TlsSubprotocolMessage):
         # type: () -> bytes
         bytes = b''
         # TLS Handshake type - 1 byte
-        bytes += struct.pack('B', [self.handshake_type.value])
+        bytes += struct.pack('B', self.handshake_type.value)
         # TLS Handshake length - 3 bytes
         bytes += struct.pack('!I', len(self.handshake_data))[1:4]  # We only keep the first 3 out of 4 bytes
         # TLS Handshake message

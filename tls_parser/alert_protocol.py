@@ -2,18 +2,18 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import struct
-from enum import Enum
+from enum import IntEnum
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
-import tls_parser.record_protocol
+from tls_parser.record_protocol import TlsSubprotocolMessage, TlsRecord, TlsRecordHeader, TlsRecordTypeByte
 from typing import Tuple
 
 
-class TlsAlertSeverityByte(Enum):
+class TlsAlertSeverityByte(IntEnum):
     WARNING = 0x01
     FATAL = 0x02
 
 
-class TlsAlertMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
+class TlsAlertMessage(TlsSubprotocolMessage):
 
     def __init__(self, alert_severity, alert_description):
         # type: (TlsAlertSeverityByte, int) -> None
@@ -31,18 +31,18 @@ class TlsAlertMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
         return TlsAlertMessage(alert_severity, alert_description), 2
 
 
-class TlsAlertRecord(tls_parser.record_protocol.TlsRecord):
+class TlsAlertRecord(TlsRecord):
     def __init__(self, record_header, alert_message):
-        # type: (tls_parser.record_protocol.TlsRecordHeader, TlsAlertMessage) -> None
+        # type: (TlsRecordHeader, TlsAlertMessage) -> None
         super(TlsAlertRecord, self).__init__(record_header, alert_message)
 
     @classmethod
     def from_bytes(cls, raw_bytes):
         # type: (bytes) -> Tuple[TlsAlertRecord, int]
-        header, len_consumed = tls_parser.record_protocol.TlsRecordHeader.from_bytes(raw_bytes)
+        header, len_consumed = TlsRecordHeader.from_bytes(raw_bytes)
         remaining_bytes = raw_bytes[len_consumed::]
 
-        if header.type != tls_parser.record_protocol.TlsRecordTypeByte.ALERT:
+        if header.type != TlsRecordTypeByte.ALERT:
             raise UnknownTypeByte()
 
         message, len_consumed_for_message = TlsAlertMessage.from_bytes(remaining_bytes)

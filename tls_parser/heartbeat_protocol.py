@@ -2,19 +2,18 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import struct
-
-from enum import Enum
-import tls_parser.record_protocol
+from enum import IntEnum
+from tls_parser.record_protocol import TlsSubprotocolMessage, TlsRecord, TlsRecordHeader, TlsRecordTypeByte
 from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple
 
 
-class TlsHeartbeatTypeByte(Enum):
-   REQUEST = 0x01
-   RESPONSE = 0x02
+class TlsHeartbeatTypeByte(IntEnum):
+    REQUEST = 0x01
+    RESPONSE = 0x02
 
 
-class TlsHeartbeatMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
+class TlsHeartbeatMessage(TlsSubprotocolMessage):
 
     def __init__(self, hearbeat_type, heartbeat_data):
         # type: (TlsHeartbeatTypeByte, bytes) -> None
@@ -30,7 +29,7 @@ class TlsHeartbeatMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
         # type: () -> bytes
         bytes = b''
         # Heartbeat message type - 1 byte
-        bytes += struct.pack('B', [self.type.value])
+        bytes += struct.pack('B', self.type.value)
         # Heartbeat message length - 2 bytes
         bytes += struct.pack('!H', len(self.data))
         # Heartbead message data
@@ -39,7 +38,7 @@ class TlsHeartbeatMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
         return bytes
 
 
-class TlsHeartbeatRequestRecord(tls_parser.record_protocol.TlsRecord):
+class TlsHeartbeatRequestRecord(TlsRecord):
     """https://tools.ietf.org/html/rfc6520.
     struct {
       HeartbeatMessageType type;
@@ -50,15 +49,14 @@ class TlsHeartbeatRequestRecord(tls_parser.record_protocol.TlsRecord):
     """
 
     def __init__(self, record_header, heartbeat_message):
-        # type: (tls_parser.record_protocol.TlsRecordHeader, TlsHeartbeatMessage) -> None
+        # type: (TlsRecordHeader, TlsHeartbeatMessage) -> None
         super(TlsHeartbeatRequestRecord, self).__init__(record_header, heartbeat_message)
 
     @classmethod
     def from_parameters(cls, tls_version, heartbeat_data):
         # type: (TlsVersionEnum, bytes) -> TlsHeartbeatRequestRecord
         message = TlsHeartbeatMessage(TlsHeartbeatTypeByte.REQUEST, heartbeat_data)
-        record_header = tls_parser.record_protocol.TlsRecordHeader(
-            tls_parser.record_protocol.TlsRecordTypeByte.HEARTBEAT, tls_version, message.size)
+        record_header = TlsRecordHeader(TlsRecordTypeByte.HEARTBEAT, tls_version, message.size)
         return TlsHeartbeatRequestRecord(record_header, message)
 
     @classmethod

@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import struct
 from enum import Enum
-
+from enum import IntEnum
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
 from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple
@@ -16,7 +16,7 @@ class TlsRecordTlsVersionBytes(Enum):
     TLSV1_2 = b'\x03\x03'
 
 
-class TlsRecordTypeByte(Enum):
+class TlsRecordTypeByte(IntEnum):
     CHANGE_CIPHER_SPEC = 0x14
     ALERT = 0x15
     HANDSHAKE = 0x16
@@ -46,7 +46,7 @@ class TlsRecordHeader(object):
         # type: () -> bytes
         bytes = b''
         # TLS Record type - 1 byte
-        bytes += struct.pack('B', [self.type.value])
+        bytes += struct.pack('B', self.type.value)
         # TLS version - 2 bytes
         bytes += TlsRecordTlsVersionBytes[self.tls_version.name].value
         # Length - 2 bytes
