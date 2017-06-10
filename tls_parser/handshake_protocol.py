@@ -3,8 +3,8 @@ from __future__ import print_function
 
 import struct
 from enum import Enum
-import tls_parser.record_protocol
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
+from tls_parser.record_protocol import TlsSubprotocolMessage, TlsRecord, TlsRecordHeader, TlsRecordTypeByte
 from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple
 
@@ -22,7 +22,7 @@ class TlsHandshakeTypeByte(Enum):
    FINISHED = 0x14
 
 
-class TlsHandshakeMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
+class TlsHandshakeMessage(TlsSubprotocolMessage):
     """The payload of a handshake record.
     """
 
@@ -57,27 +57,25 @@ class TlsHandshakeMessage(tls_parser.record_protocol.TlsSubprotocolMessage):
         return bytes
 
 
-class TlsHandshakeRecord(tls_parser.record_protocol.TlsRecord):
+class TlsHandshakeRecord(TlsRecord):
 
     def __init__(self, record_header, handshake_message):
-        # type: (tls_parser.record_protocol.TlsRecordHeader, TlsHandshakeMessage) -> None
+        # type: (TlsRecordHeader, TlsHandshakeMessage) -> None
         super(TlsHandshakeRecord, self).__init__(record_header, handshake_message)
 
     @classmethod
     def from_parameters(cls, tls_version, handshake_type, handshake_data):
         handshake_message = TlsHandshakeMessage(handshake_type, handshake_data)
-        record_header = tls_parser.record_protocol.TlsRecordHeader(
-            tls_parser.record_protocol.TlsRecordTypeByte.HANDSHAKE, tls_version, handshake_message.size
-        )
+        record_header = TlsRecordHeader(TlsRecordTypeByte.HANDSHAKE, tls_version, handshake_message.size)
         return TlsHandshakeRecord(record_header, handshake_message)
 
     @classmethod
     def from_bytes(cls, raw_bytes):
         # type: (bytes) -> Tuple[TlsHandshakeRecord, int]
-        header, len_consumed = tls_parser.record_protocol.TlsRecordHeader.from_bytes(raw_bytes)
+        header, len_consumed = TlsRecordHeader.from_bytes(raw_bytes)
         remaining_bytes = raw_bytes[len_consumed::]
 
-        if header.type != tls_parser.record_protocol.TlsRecordTypeByte.HANDSHAKE:
+        if header.type != TlsRecordTypeByte.HANDSHAKE:
             raise UnknownTypeByte()
 
         # Try to parse the handshake record
@@ -104,9 +102,7 @@ class TlsServerHelloDoneRecord(TlsHandshakeRecord):
     @classmethod
     def from_parameters(cls, tls_version):
         # type: (TlsVersionEnum) -> TlsServerHelloDoneRecord
-        record_header = tls_parser.record_protocol.TlsRecordHeader(
-            tls_parser.record_protocol.TlsRecordTypeByte.SERVER_DONE, tls_version, 0
-        )
+        record_header = TlsRecordHeader(TlsRecordTypeByte.SERVER_DONE, tls_version, 0)
         return TlsServerHelloDoneRecord(record_header)
 
     @classmethod

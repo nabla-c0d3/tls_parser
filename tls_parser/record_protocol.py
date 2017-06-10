@@ -7,7 +7,6 @@ from enum import Enum
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
 from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple
-import tls_parser.handshake_protocol
 
 
 class TlsRecordTlsVersionBytes(Enum):
@@ -67,18 +66,14 @@ class TlsRecord(object):
         record_header, len_consumed = TlsRecordHeader.from_bytes(raw_bytes)
 
         # Try to parse the record
-        if record_header.type == TlsRecordTypeByte.HANDSHAKE:
-            return tls_parser.handshake_protocol.TlsHandshakeRecord.from_bytes(raw_bytes)
-        elif record_header.type in TlsRecordTypeByte:
-            # Valid record type but we don't have the code to parse it right now
-            record_data = raw_bytes[len_consumed:record_header.length]
-            if len(record_data) < record_header.length:
-                raise NotEnoughData()
-            message = TlsSubprotocolMessage(record_data)
-            return TlsRecord(record_header, message), len_consumed + record_header.length
-        else:
-            # Unknown type
+        if record_header.type not in TlsRecordTypeByte:
             raise UnknownTypeByte()
+
+        record_data = raw_bytes[len_consumed:record_header.length]
+        if len(record_data) < record_header.length:
+            raise NotEnoughData()
+        message = TlsSubprotocolMessage(record_data)
+        return TlsRecord(record_header, message), len_consumed + record_header.length
 
     def to_bytes(self):
         # type: () -> bytes
