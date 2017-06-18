@@ -27,7 +27,7 @@ class TlsAlertMessage(TlsSubprotocolMessage):
         # type: (bytes) -> Tuple[TlsAlertMessage, int]
         if len(raw_bytes) < 2:
             raise NotEnoughData()
-        print(repr(raw_bytes))
+        
         alert_severity = TlsAlertSeverityByte(struct.unpack('B', raw_bytes[0:1])[0])
         alert_description = struct.unpack('B', raw_bytes[1:2])[0]
         return TlsAlertMessage(alert_severity, alert_description), 2
