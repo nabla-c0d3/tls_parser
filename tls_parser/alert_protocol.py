@@ -46,7 +46,8 @@ class TlsAlertRecord(TlsRecord):
         super(TlsAlertRecord, self).__init__(record_header, [alert_message])
 
     @property
-    def alert_severity(self) -> TlsAlertSeverityByte:
+    def alert_severity(self):
+        # type: () -> TlsAlertSeverityByte
         """Convenience method to get the severity of the underlying Alert message.
 
         This makes the assumption that an Alert record only contains one Alert message, which seems to be the case in
@@ -55,7 +56,8 @@ class TlsAlertRecord(TlsRecord):
         return self.subprotocol_messages[0].alert_severity
 
     @property
-    def alert_description(self) -> int:
+    def alert_description(self):
+        # type: () -> int
         """Convenience method to get the description of the underlying Alert message.
 
         This makes the assumption that an Alert record only contains one Alert message, which seems to be the case in
