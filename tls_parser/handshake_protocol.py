@@ -6,7 +6,7 @@ from enum import IntEnum
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
 from tls_parser.record_protocol import TlsSubprotocolMessage, TlsRecord, TlsRecordHeader, TlsRecordTypeByte
 from tls_parser.tls_version import TlsVersionEnum
-from typing import Tuple
+from typing import Tuple, List
 
 
 class TlsHandshakeTypeByte(IntEnum):
@@ -59,59 +59,27 @@ class TlsHandshakeMessage(TlsSubprotocolMessage):
 
 class TlsHandshakeRecord(TlsRecord):
 
-    def __init__(self, record_header, handshake_message):
-        # type: (TlsRecordHeader, TlsHandshakeMessage) -> None
-        super(TlsHandshakeRecord, self).__init__(record_header, handshake_message)
-
-    @classmethod
-    def from_parameters(cls, tls_version, handshake_type, handshake_data):
-        handshake_message = TlsHandshakeMessage(handshake_type, handshake_data)
-        record_header = TlsRecordHeader(TlsRecordTypeByte.HANDSHAKE, tls_version, handshake_message.size)
-        return TlsHandshakeRecord(record_header, handshake_message)
+    def __init__(self, record_header, handshake_messages):
+        # type: (TlsRecordHeader, List[TlsHandshakeMessage]) -> None
+        super(TlsHandshakeRecord, self).__init__(record_header, handshake_messages)
 
     @classmethod
     def from_bytes(cls, raw_bytes):
         # type: (bytes) -> Tuple[TlsHandshakeRecord, int]
-        header, len_consumed = TlsRecordHeader.from_bytes(raw_bytes)
-        remaining_bytes = raw_bytes[len_consumed::]
+        header, len_consumed_for_header = TlsRecordHeader.from_bytes(raw_bytes)
+        remaining_bytes = raw_bytes[len_consumed_for_header::]
 
         if header.type != TlsRecordTypeByte.HANDSHAKE:
             raise UnknownTypeByte()
 
-        # Try to parse the handshake record
-        message, len_consumed_for_message = TlsHandshakeMessage.from_bytes(remaining_bytes)
-        handshake_type = TlsHandshakeTypeByte(struct.unpack('B', remaining_bytes[0:1])[0])
-        if handshake_type == TlsHandshakeTypeByte.SERVER_DONE:
-            parsed_record = TlsServerHelloDoneRecord(header)
-        elif handshake_type in TlsHandshakeTypeByte:
-            # Valid handshake type but we don't have the code to parse it right now
-            parsed_record = TlsHandshakeRecord(header, message)
-        else:
-            raise UnknownTypeByte()
+        # Try to parse the handshake record - there may be multiple messages packed in the record
+        messages = []
+        total_len_consumed_for_messages = 0
+        while total_len_consumed_for_messages != header.length:
+            message, len_consumed_for_message = TlsHandshakeMessage.from_bytes(remaining_bytes)
+            messages.append(message)
+            total_len_consumed_for_messages += len_consumed_for_message
+            remaining_bytes = remaining_bytes[len_consumed_for_message::]
 
-        return parsed_record, len_consumed + len_consumed_for_message
-
-
-class TlsServerHelloDoneRecord(TlsHandshakeRecord):
-
-    def __init__(self, record_header):
-        # A ServerHelloDone does not carry any actual data
-        super(TlsServerHelloDoneRecord, self).__init__(record_header,
-                                                       TlsHandshakeMessage(TlsHandshakeTypeByte.SERVER_DONE, b''))
-
-    @classmethod
-    def from_parameters(cls, tls_version):
-        # type: (TlsVersionEnum) -> TlsServerHelloDoneRecord
-        record_header = TlsRecordHeader(TlsRecordTypeByte.SERVER_DONE, tls_version, 0)
-        return TlsServerHelloDoneRecord(record_header)
-
-    @classmethod
-    def from_bytes(cls, raw_bytes):
-        # type: (bytes) -> Tuple[TlsServerHelloDoneRecord, int]
-        parsed_record, len_consumed = super(TlsServerHelloDoneRecord, cls).from_bytes(raw_bytes)
-
-        if parsed_record.subprotocol_message.handshake_type != TlsHandshakeTypeByte.SERVER_DONE:
-            raise UnknownTypeByte()
-
-        return parsed_record, len_consumed
-    
+        parsed_record = TlsHandshakeRecord(header, messages)
+        return parsed_record, len_consumed_for_header + total_len_consumed_for_messages

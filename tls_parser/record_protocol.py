@@ -6,7 +6,7 @@ from enum import Enum
 from enum import IntEnum
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
 from tls_parser.tls_version import TlsVersionEnum
-from typing import Tuple
+from typing import Tuple, List
 
 
 class TlsRecordTlsVersionBytes(Enum):
@@ -55,10 +55,16 @@ class TlsRecordHeader(object):
 
 
 class TlsRecord(object):
-    def __init__(self, record_header, subprotocol_message):
-        # type: (TlsRecordHeader, TlsSubprotocolMessage) -> None
+    def __init__(self, record_header, subprotocol_messages):
+        # type: (TlsRecordHeader, List[TlsSubprotocolMessage]) -> None
         self.header = record_header
-        self.subprotocol_message = subprotocol_message
+
+        # Several messages can be concatenated into a single record; the messages must belong to the same subprotocol
+        # Hence, in practice this only seems to apply to the handshake protocol
+        if self.header.type != TlsRecordTypeByte.HANDSHAKE and len(subprotocol_messages) != 1:
+            raise ValueError('Received multiple subprotocol messages for a non-handshake record')
+
+        self.subprotocol_messages = subprotocol_messages
 
     @classmethod
     def from_bytes(cls, raw_bytes):
@@ -72,20 +78,23 @@ class TlsRecord(object):
         record_data = raw_bytes[len_consumed:record_header.length]
         if len(record_data) < record_header.length:
             raise NotEnoughData()
+
+        # We do not attempt to parse the message - the data may actually contain multiple messages
         message = TlsSubprotocolMessage(record_data)
-        return TlsRecord(record_header, message), len_consumed + record_header.length
+        return TlsRecord(record_header, [message]), len_consumed + record_header.length
 
     def to_bytes(self):
         # type: () -> bytes
         bytes = b''
         bytes += self.header.to_bytes()
-        bytes += self.subprotocol_message.to_bytes()
+        for message in self.subprotocol_messages:
+            bytes += message.to_bytes()
         return bytes
 
 
 class TlsSubprotocolMessage(object):
     # Handshake, Alert, etc.
-    # Unparsed message
+
     def __init__(self, message_data):
         # type: (bytes) -> None
         self.message_data = message_data

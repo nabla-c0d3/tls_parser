@@ -11,8 +11,6 @@ class TlsAlertRecordTestCase(unittest.TestCase):
 
     def test_from_bytes(self):
         parsed_record, len_consumed = TlsAlertRecord.from_bytes(self.ALERT_BYTES)
-        self.assertEqual(parsed_record.subprotocol_message.alert_severity, TlsAlertSeverityByte.FATAL)
-        self.assertEqual(parsed_record.subprotocol_message.alert_description, 0x14)
+        self.assertEqual(parsed_record.alert_severity, TlsAlertSeverityByte.FATAL)
+        self.assertEqual(parsed_record.alert_description, 0x14)
         self.assertEqual(len_consumed, len(self.ALERT_BYTES))
-
-

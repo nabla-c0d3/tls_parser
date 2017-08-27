@@ -3,7 +3,6 @@ from __future__ import print_function
 
 import unittest
 
-from tls_parser.handshake_protocol import TlsServerHelloDoneRecord, TlsHandshakeRecord, TlsHandshakeTypeByte
 from tls_parser.heartbeat_protocol import TlsHeartbeatRequestRecord
 from tls_parser.tls_version import TlsVersionEnum
 

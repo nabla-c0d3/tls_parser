@@ -17,10 +17,13 @@ class TlsApplicationDataMessage(TlsSubprotocolMessage):
 
 
 class TlsApplicationDataRecord(TlsRecord):
+    """We make the assumption that an Application record only contains one message, which seems to be the case in the
+    real world.
+    """
 
     def __init__(self, record_header, application_data):
         # type: (TlsRecordHeader, TlsApplicationDataMessage) -> None
-        super(TlsApplicationDataRecord, self).__init__(record_header, application_data)
+        super(TlsApplicationDataRecord, self).__init__(record_header, [application_data])
 
     @classmethod
     def from_parameters(cls, tls_version, application_data):

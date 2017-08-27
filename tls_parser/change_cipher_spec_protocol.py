@@ -10,7 +10,7 @@ class TlsChangeCipherSpecRecord(TlsRecord):
         # type: (TlsVersionEnum) -> TlsChangeCipherSpecRecord
         ccs_message = TlsSubprotocolMessage(b'\x01')
         record_header = TlsRecordHeader(TlsRecordTypeByte.CHANGE_CIPHER_SPEC, tls_version, ccs_message.size)
-        return TlsChangeCipherSpecRecord(record_header, ccs_message)
+        return TlsChangeCipherSpecRecord(record_header, [ccs_message])
 
     @classmethod
     def from_bytes(cls, raw_bytes):

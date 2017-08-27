@@ -50,7 +50,7 @@ class TlsHeartbeatRequestRecord(TlsRecord):
 
     def __init__(self, record_header, heartbeat_message):
         # type: (TlsRecordHeader, TlsHeartbeatMessage) -> None
-        super(TlsHeartbeatRequestRecord, self).__init__(record_header, heartbeat_message)
+        super(TlsHeartbeatRequestRecord, self).__init__(record_header, [heartbeat_message])
 
     @classmethod
     def from_parameters(cls, tls_version, heartbeat_data):
