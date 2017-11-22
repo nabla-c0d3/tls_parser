@@ -75,7 +75,7 @@ class TlsRecord(object):
         if record_header.type not in TlsRecordTypeByte:
             raise UnknownTypeByte()
 
-        record_data = raw_bytes[len_consumed:record_header.length]
+        record_data = raw_bytes[len_consumed:len_consumed+record_header.length]
         if len(record_data) < record_header.length:
             raise NotEnoughData()
 
