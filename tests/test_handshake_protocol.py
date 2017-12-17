@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import unittest
 
+import binascii
 import math
 
 from tls_parser.record_protocol import TlsRecordTlsVersionBytes
@@ -85,7 +86,8 @@ class TlsHandshakeRecordTestCase(unittest.TestCase):
         # Generate padding - it should be of the form "00 02 <random> 00 <TLS version> <premaster secret>
         pad_len = (modulus_byte_size - 48 - 3) * 2
         rnd_pad = ("abcd" * (pad_len // 2 + 1))[:pad_len]
-        pms_with_padding = int("0002" + rnd_pad + "00" + TlsRecordTlsVersionBytes[TlsVersionEnum.TLSV1_2.name].value
+        pms_with_padding = int("0002" + rnd_pad + "00"
+                               + binascii.b2a_hex(TlsRecordTlsVersionBytes[TlsVersionEnum.TLSV1_2.name].value)
                                + pre_master_secret, 16)
 
         record = TlsRsaClientKeyExchangeRecord.from_parameters(TlsVersionEnum.TLSV1_2, exponent, modulus,
