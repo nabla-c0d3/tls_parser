@@ -2,7 +2,13 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import unittest
-from tls_parser.handshake_protocol import TlsHandshakeRecord, TlsHandshakeTypeByte
+
+import math
+
+from tls_parser.tls_version import TlsVersionEnum
+
+from tls_parser.handshake_protocol import TlsHandshakeRecord, TlsHandshakeTypeByte,  \
+    TlsRsaClientKeyExchangeRecord
 
 
 class TlsHandshakeRecordTestCase(unittest.TestCase):
@@ -45,3 +51,41 @@ class TlsHandshakeRecordTestCase(unittest.TestCase):
         self.assertEqual(parsed_record.subprotocol_messages[2].handshake_type, TlsHandshakeTypeByte.SERVER_KEY_EXCHANGE)
         self.assertEqual(parsed_record.subprotocol_messages[3].handshake_type, TlsHandshakeTypeByte.SERVER_DONE)
         self.assertEqual(len_consumed, len(self.MULTIPLE_MESSAGES_BYTES))
+
+    EXPECTED_CLIENT_KEY_EXCHANGE_BYTES = \
+        b'\x16\x03\x03\x01\x06\x10\x00\x01\x02\x01\x00\x0b\x0es\xccE\xe9\xee\xca\x9b*\x00]\x80\xb7\x984\x93\xeeh' \
+        b'\xcf\xfc\xe3]\xa3\r\xd1\xb9%\xe3\xbc\xe5\xa4\xc5\x14\xb9~\x92\'\xe4\xbc\xca\xfa\xa2\x0f\xeb c\xab%' \
+        b'\x91\xfc\xa7\x8e\xb5\xa0\xb2\xa3\xd9\x14\x83Z\xfc\x94\x8e2\xaf\xd8\x08\xe4\xe6\xd5\xd2\xb5~\xdf\x1e' \
+        b'\x99\xc5^\x8a\xac8EU\x9brV\xbb\x02\x1eF\xd7\xda\xa2\xeb.\x95\xa5\xb9,4\x98\x1f"#\x07\xfa%\x94\xc0\xe2' \
+        b'\x04\xa3\x04[\x1e\xf9\xacj\xd6\xddo6\x91\x94+\xc1Y5\xe7#\x85e\xbd\x03\'\x10g\xef\xd0\xd7\xc1\x8eF\'\xd9' \
+        b'\x9a\x9f^H;d\xb5\xddv\xceX\xfc\x99\x9f\xbd*\x12nI|\xf4\x109\x9f\x17\x94\xe3T\xd38\xbfj\xff\x881\xb9' \
+        b'\xce\x9b\xe9\x0e\xe6\x9c\x1b\xbd\xcd\x1f\xa0\xf2x\xaf\x01\xb4t\xf4{\x05\x80RC\xc4h\x9e\xbd\xcfcw\xfd' \
+        b'\x02~\x03\xc9\x9a\xfa4\xed\xe8IDA&\xe9\x01\\\xca\xb2\xe3\x08\xeb\xefhV5\xb3\xee%\xae\xceK\x8d\x80N\xdf' \
+        b'\xe8\xb5\xca\xed\xd3\x9a[\xf4'
+
+    MODULUS_HEX =  \
+'0x9944d2fd7dbdc447a1de74002c4746dbf99d0d64e24a0ccea319f04af4b71acb1eeefcfb8ff904f689977006d113365b503e58b7fea2cbe985294775c0' \
+'0d5da171d3bf227b71f80223c1f55c141c5a892eefcf8f4d36ddb7b2ed179fb3a48498ea57dd80e09b6c8d64553b15bdc92a1465692965d5f1e65d85a679' \
+'466577fdf8302100c2a07af0b8dd1fc2f63f52e8f220ee0f4ef33a2a6b94e20ac82cf8d1073705f09f7a506ead5ba6271e60e80aa32a369a614bd1fa9226' \
+'8f504a6b7da72ad870aca13f543c00d7725d082f796e5f6c6eee02ecd860388360ce95a2ba4057cbb0053af32209b88d921d1c2d4569f806c44132214a61' \
+'78242d2486b643e773'
+
+    EXPONENT_HEX = '0x10001'
+
+    def test_rsa_client_key_exchange_to_bytes(self):
+        # Inspired by https://github.com/robotattackorg/robot-detect
+        modulus = int(self.MODULUS_HEX, 16)
+        exponent = int(self.EXPONENT_HEX, 16)
+        modulus_bit_size = int(math.ceil(math.log(modulus, 2)))
+        modulus_byte_size = (modulus_bit_size + 7) // 8
+
+        # Generate padding
+        pad_len = (modulus_byte_size - 48 - 3) * 2
+        rnd_pad = ("abcd" * (pad_len // 2 + 1))[:pad_len]
+
+        # Generate pre_master_secret
+        rnd_pms = "aa112233445566778899112233445566778899112233445566778899112233445566778899112233445566778899"
+        pms_good_in = int("0002" + rnd_pad + "00" + "0303" + rnd_pms, 16)
+
+        record = TlsRsaClientKeyExchangeRecord.from_parameters(TlsVersionEnum.TLSV1_2, exponent, modulus, pms_good_in)
+        self.assertEqual(record.to_bytes(), self.EXPECTED_CLIENT_KEY_EXCHANGE_BYTES)

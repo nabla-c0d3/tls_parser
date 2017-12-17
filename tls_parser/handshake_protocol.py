@@ -3,9 +3,12 @@ from __future__ import print_function
 
 import struct
 from enum import IntEnum
+
+from tls_parser.byte_utils import int_to_bytes
+from tls_parser.tls_version import TlsVersionEnum
+
 from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
 from tls_parser.record_protocol import TlsSubprotocolMessage, TlsRecord, TlsRecordHeader, TlsRecordTypeByte
-from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple, List
 
 
@@ -83,3 +86,25 @@ class TlsHandshakeRecord(TlsRecord):
 
         parsed_record = TlsHandshakeRecord(header, messages)
         return parsed_record, len_consumed_for_header + total_len_consumed_for_messages
+
+
+class TlsRsaClientKeyExchangeRecord(TlsHandshakeRecord):
+
+    @classmethod
+    def from_parameters(cls, tls_version, public_exponent, public_modulus, pre_master_secret):
+        # type: (TlsVersionEnum, int, int, int) -> TlsHandshakeRecord
+        # Build the message
+        cke_bytes = b''
+
+        # Not sure what this is? Taken from https://github.com/robotattackorg/robot-detect
+        cke_bytes += b'\x01\x00'
+
+        # Encrypt and add the pre_master_secret
+        encrypted_pms = pow(pre_master_secret, public_exponent, public_modulus)
+        cke_bytes += int_to_bytes(encrypted_pms)
+
+        msg = TlsHandshakeMessage(TlsHandshakeTypeByte.CLIENT_KEY_EXCHANGE, cke_bytes)
+
+        # Build the header
+        header = TlsRecordHeader(TlsRecordTypeByte.HANDSHAKE, tls_version, len(msg.to_bytes()))
+        return TlsHandshakeRecord(header, [msg])
