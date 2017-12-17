@@ -40,7 +40,7 @@ class TlsRecordHeader(object):
         record_type = TlsRecordTypeByte(struct.unpack('B', raw_bytes[0:1])[0])
         tls_version = TlsRecordTlsVersionBytes(raw_bytes[1:3])
         record_length = struct.unpack('!H', raw_bytes[3:5])[0]
-        return TlsRecordHeader(record_type, tls_version, record_length), 5
+        return TlsRecordHeader(record_type, TlsVersionEnum[tls_version.name], record_length), 5
 
     def to_bytes(self):
         # type: () -> bytes

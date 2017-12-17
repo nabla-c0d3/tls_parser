@@ -5,6 +5,7 @@ import unittest
 
 import math
 
+from tls_parser.record_protocol import TlsRecordTlsVersionBytes
 from tls_parser.tls_version import TlsVersionEnum
 
 from tls_parser.handshake_protocol import TlsHandshakeRecord, TlsHandshakeTypeByte,  \
@@ -79,13 +80,14 @@ class TlsHandshakeRecordTestCase(unittest.TestCase):
         modulus_bit_size = int(math.ceil(math.log(modulus, 2)))
         modulus_byte_size = (modulus_bit_size + 7) // 8
 
-        # Generate padding
+        pre_master_secret = "aa112233445566778899112233445566778899112233445566778899112233445566778899112233445566778899"
+
+        # Generate padding - it should be of the form "00 02 <random> 00 <TLS version> <premaster secret>
         pad_len = (modulus_byte_size - 48 - 3) * 2
         rnd_pad = ("abcd" * (pad_len // 2 + 1))[:pad_len]
+        pms_with_padding = int("0002" + rnd_pad + "00" + TlsRecordTlsVersionBytes[TlsVersionEnum.TLSV1_2.name].value
+                               + pre_master_secret, 16)
 
-        # Generate pre_master_secret
-        rnd_pms = "aa112233445566778899112233445566778899112233445566778899112233445566778899112233445566778899"
-        pms_good_in = int("0002" + rnd_pad + "00" + "0303" + rnd_pms, 16)
-
-        record = TlsRsaClientKeyExchangeRecord.from_parameters(TlsVersionEnum.TLSV1_2, exponent, modulus, pms_good_in)
+        record = TlsRsaClientKeyExchangeRecord.from_parameters(TlsVersionEnum.TLSV1_2, exponent, modulus,
+                                                               pms_with_padding)
         self.assertEqual(record.to_bytes(), self.EXPECTED_CLIENT_KEY_EXCHANGE_BYTES)

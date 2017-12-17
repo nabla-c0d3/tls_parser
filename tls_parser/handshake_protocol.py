@@ -91,7 +91,7 @@ class TlsHandshakeRecord(TlsRecord):
 class TlsRsaClientKeyExchangeRecord(TlsHandshakeRecord):
 
     @classmethod
-    def from_parameters(cls, tls_version, public_exponent, public_modulus, pre_master_secret):
+    def from_parameters(cls, tls_version, public_exponent, public_modulus, pre_master_secret_with_padding):
         # type: (TlsVersionEnum, int, int, int) -> TlsHandshakeRecord
         # Build the message
         cke_bytes = b''
@@ -100,7 +100,7 @@ class TlsRsaClientKeyExchangeRecord(TlsHandshakeRecord):
         cke_bytes += b'\x01\x00'
 
         # Encrypt and add the pre_master_secret
-        encrypted_pms = pow(pre_master_secret, public_exponent, public_modulus)
+        encrypted_pms = pow(pre_master_secret_with_padding, public_exponent, public_modulus)
         cke_bytes += int_to_bytes(encrypted_pms)
 
         msg = TlsHandshakeMessage(TlsHandshakeTypeByte.CLIENT_KEY_EXCHANGE, cke_bytes)
