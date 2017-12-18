@@ -107,4 +107,4 @@ class TlsRsaClientKeyExchangeRecord(TlsHandshakeRecord):
 
         # Build the header
         header = TlsRecordHeader(TlsRecordTypeByte.HANDSHAKE, tls_version, len(msg.to_bytes()))
-        return TlsHandshakeRecord(header, [msg])
+        return TlsRsaClientKeyExchangeRecord(header, [msg])
