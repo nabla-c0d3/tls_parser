@@ -93,16 +93,20 @@ class TlsRsaClientKeyExchangeRecord(TlsHandshakeRecord):
     @classmethod
     def from_parameters(cls, tls_version, public_exponent, public_modulus, pre_master_secret_with_padding):
         # type: (TlsVersionEnum, int, int, int) -> TlsHandshakeRecord
-        # Build the message
         cke_bytes = b''
 
-        # Not sure what this is? Taken from https://github.com/robotattackorg/robot-detect
-        cke_bytes += b'\x01\x00'
-
-        # Encrypt and add the pre_master_secret
+        # Encrypt the pre_master_secret
         encrypted_pms = pow(pre_master_secret_with_padding, public_exponent, public_modulus)
-        cke_bytes += int_to_bytes(encrypted_pms)
+        # Add it to the message but pad it so that its length is the same as the length of the modulus
+        modulus_length = len(int_to_bytes(public_modulus))
+        encrypted_pms_bytes = int_to_bytes(encrypted_pms, expected_length=modulus_length)
 
+        # Per RFC 5246: the RSA-encrypted PreMasterSecret in a ClientKeyExchange is preceded by two length bytes
+        # These bytes are redundant in the case of RSA because the EncryptedPreMasterSecret is the only data in the
+        # ClientKeyExchange
+        msg_size = struct.pack('!I', len(encrypted_pms_bytes))[2:4]  # Length is two bytes
+        cke_bytes += msg_size
+        cke_bytes += encrypted_pms_bytes
         msg = TlsHandshakeMessage(TlsHandshakeTypeByte.CLIENT_KEY_EXCHANGE, cke_bytes)
 
         # Build the header
