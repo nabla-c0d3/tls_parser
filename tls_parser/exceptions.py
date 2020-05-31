@@ -1,3 +1,8 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from tls_parser.record_protocol import TlsRecordTypeByte
+
 
 class NotEnoughData(ValueError):
     pass
@@ -8,4 +13,7 @@ class UnknownTypeByte(ValueError):
 
 
 class UnknownTlsVersionByte(ValueError):
-    pass
+    def __init__(self, message, record_type):
+        # type: (str, TlsRecordTypeByte) -> None
+        super(ValueError, self).__init__(message)
+        self.record_type = record_type

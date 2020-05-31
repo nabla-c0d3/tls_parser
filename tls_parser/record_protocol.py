@@ -4,7 +4,7 @@ from __future__ import print_function
 import struct
 from enum import Enum
 from enum import IntEnum
-from tls_parser.exceptions import NotEnoughData, UnknownTypeByte
+from tls_parser.exceptions import NotEnoughData, UnknownTypeByte, UnknownTlsVersionByte
 from tls_parser.tls_version import TlsVersionEnum
 from typing import Tuple, List
 
@@ -38,7 +38,12 @@ class TlsRecordHeader(object):
             raise NotEnoughData()
 
         record_type = TlsRecordTypeByte(struct.unpack('B', raw_bytes[0:1])[0])
-        tls_version = TlsRecordTlsVersionBytes(raw_bytes[1:3])
+
+        try:
+            tls_version = TlsRecordTlsVersionBytes(raw_bytes[1:3])
+        except ValueError as e:
+            raise UnknownTlsVersionByte(e.args[0], record_type)
+
         record_length = struct.unpack('!H', raw_bytes[3:5])[0]
         return TlsRecordHeader(record_type, TlsVersionEnum[tls_version.name], record_length), 5
 
