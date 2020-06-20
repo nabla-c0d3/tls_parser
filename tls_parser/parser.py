@@ -5,10 +5,9 @@ from tls_parser.record_protocol import TlsRecord, TlsRecordHeader, TlsRecordType
 from typing import Tuple
 
 
-class TlsRecordParser(object):
+class TlsRecordParser:
     @staticmethod
-    def parse_bytes(raw_bytes):
-        # type: (bytes) -> Tuple[TlsRecord, int]
+    def parse_bytes(raw_bytes: bytes) -> Tuple[TlsRecord, int]:
         record_header, len_consumed = TlsRecordHeader.from_bytes(raw_bytes)
 
         # Try to parse the record

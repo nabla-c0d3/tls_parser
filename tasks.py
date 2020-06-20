@@ -5,7 +5,7 @@ from invoke import task, Context
 def test(ctx):
     # type: (Context) -> None
     # Run the test suite
-    ctx.run("pytest --cov=tls_parser")
+    ctx.run("pytest --cov=tls_parser --cov-fail-under 80")
 
     # Run linters
     ctx.run("flake8 .")

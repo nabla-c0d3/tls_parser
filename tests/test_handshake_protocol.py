@@ -1,6 +1,7 @@
 import binascii
 import math
 
+from tls_parser.cipher_suites import CipherSuites
 from tls_parser.record_protocol import TlsRecordTlsVersionBytes
 from tls_parser.tls_version import TlsVersionEnum
 
@@ -93,3 +94,9 @@ class TestTlsHandshakeRecord:
             TlsVersionEnum.TLSV1_2, exponent, modulus, pms_with_padding
         )
         assert record.to_bytes() == self.EXPECTED_CLIENT_KEY_EXCHANGE_BYTES
+
+
+class TestCipherSuites:
+    def test(self):
+        # Ensure the CipherSuites enum is importable and usable
+        assert CipherSuites.TLS_DH_anon_EXPORT_WITH_RC4_40_MD5.value

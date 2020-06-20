@@ -13,7 +13,6 @@ class UnknownTypeByte(ValueError):
 
 
 class UnknownTlsVersionByte(ValueError):
-    def __init__(self, message, record_type):
-        # type: (str, TlsRecordTypeByte) -> None
+    def __init__(self, message: str, record_type: "TlsRecordTypeByte") -> None:
         super(ValueError, self).__init__(message)
         self.record_type = record_type
