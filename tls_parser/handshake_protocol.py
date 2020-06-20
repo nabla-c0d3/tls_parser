@@ -42,7 +42,7 @@ class TlsHandshakeMessage(TlsSubprotocolMessage):
 
         handshake_type = TlsHandshakeTypeByte(struct.unpack("B", raw_bytes[0:1])[0])
         message_length = struct.unpack("!I", b"\x00" + raw_bytes[1:4])[0]
-        message = raw_bytes[4 : message_length + 4]
+        message = raw_bytes[4: message_length + 4]
         if len(message) < message_length:
             raise NotEnoughData()
 
