@@ -6,7 +6,6 @@ from tls_parser.tls_version import TlsVersionEnum
 
 
 class TlsApplicationDataMessage(TlsSubprotocolMessage):
-
     def __init__(self, application_data):
         # type: (bytes) -> None
         self.data = application_data

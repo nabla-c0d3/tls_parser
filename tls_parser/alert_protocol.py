@@ -15,7 +15,6 @@ class TlsAlertSeverityByte(IntEnum):
 
 
 class TlsAlertMessage(TlsSubprotocolMessage):
-
     def __init__(self, alert_severity, alert_description):
         # type: (TlsAlertSeverityByte, int) -> None
         self.alert_severity = alert_severity
@@ -27,16 +26,16 @@ class TlsAlertMessage(TlsSubprotocolMessage):
         # type: (bytes) -> Tuple[TlsAlertMessage, int]
         if len(raw_bytes) < 2:
             raise NotEnoughData()
-        
-        alert_severity = TlsAlertSeverityByte(struct.unpack('B', raw_bytes[0:1])[0])
-        alert_description = struct.unpack('B', raw_bytes[1:2])[0]
+
+        alert_severity = TlsAlertSeverityByte(struct.unpack("B", raw_bytes[0:1])[0])
+        alert_description = struct.unpack("B", raw_bytes[1:2])[0]
         return TlsAlertMessage(alert_severity, alert_description), 2
 
     def to_bytes(self):
         # type: () -> bytes
-        bytes = b''
-        bytes += struct.pack('B', self.alert_severity.value)
-        bytes += struct.pack('B', self.alert_description)
+        bytes = b""
+        bytes += struct.pack("B", self.alert_severity.value)
+        bytes += struct.pack("B", self.alert_description)
         return bytes
 
 

@@ -10,10 +10,10 @@ from typing import Tuple, List
 
 
 class TlsRecordTlsVersionBytes(Enum):
-    SSLV3 = b'\x03\x00'
-    TLSV1 = b'\x03\x01'
-    TLSV1_1 = b'\x03\x02'
-    TLSV1_2 = b'\x03\x03'
+    SSLV3 = b"\x03\x00"
+    TLSV1 = b"\x03\x01"
+    TLSV1_1 = b"\x03\x02"
+    TLSV1_2 = b"\x03\x03"
 
 
 class TlsRecordTypeByte(IntEnum):
@@ -37,25 +37,25 @@ class TlsRecordHeader(object):
         if len(raw_bytes) < 5:
             raise NotEnoughData()
 
-        record_type = TlsRecordTypeByte(struct.unpack('B', raw_bytes[0:1])[0])
+        record_type = TlsRecordTypeByte(struct.unpack("B", raw_bytes[0:1])[0])
 
         try:
             tls_version = TlsRecordTlsVersionBytes(raw_bytes[1:3])
         except ValueError as e:
             raise UnknownTlsVersionByte(e.args[0], record_type)
 
-        record_length = struct.unpack('!H', raw_bytes[3:5])[0]
+        record_length = struct.unpack("!H", raw_bytes[3:5])[0]
         return TlsRecordHeader(record_type, TlsVersionEnum[tls_version.name], record_length), 5
 
     def to_bytes(self):
         # type: () -> bytes
-        bytes = b''
+        bytes = b""
         # TLS Record type - 1 byte
-        bytes += struct.pack('B', self.type.value)
+        bytes += struct.pack("B", self.type.value)
         # TLS version - 2 bytes
         bytes += TlsRecordTlsVersionBytes[self.tls_version.name].value
         # Length - 2 bytes
-        bytes += struct.pack('!H', self.length)
+        bytes += struct.pack("!H", self.length)
         return bytes
 
 
@@ -67,7 +67,7 @@ class TlsRecord(object):
         # Several messages can be concatenated into a single record; the messages must belong to the same subprotocol
         # Hence, in practice this only seems to apply to the handshake protocol
         if self.header.type != TlsRecordTypeByte.HANDSHAKE and len(subprotocol_messages) != 1:
-            raise ValueError('Received multiple subprotocol messages for a non-handshake record')
+            raise ValueError("Received multiple subprotocol messages for a non-handshake record")
 
         self.subprotocol_messages = subprotocol_messages
 
@@ -80,7 +80,7 @@ class TlsRecord(object):
         if record_header.type not in TlsRecordTypeByte:
             raise UnknownTypeByte()
 
-        record_data = raw_bytes[len_consumed:len_consumed+record_header.length]
+        record_data = raw_bytes[len_consumed : len_consumed + record_header.length]
         if len(record_data) < record_header.length:
             raise NotEnoughData()
 
@@ -90,7 +90,7 @@ class TlsRecord(object):
 
     def to_bytes(self):
         # type: () -> bytes
-        bytes = b''
+        bytes = b""
         bytes += self.header.to_bytes()
         for message in self.subprotocol_messages:
             bytes += message.to_bytes()

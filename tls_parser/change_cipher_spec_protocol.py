@@ -4,11 +4,10 @@ from typing import Tuple
 
 
 class TlsChangeCipherSpecRecord(TlsRecord):
-
     @classmethod
     def from_parameters(cls, tls_version):
         # type: (TlsVersionEnum) -> TlsChangeCipherSpecRecord
-        ccs_message = TlsSubprotocolMessage(b'\x01')
+        ccs_message = TlsSubprotocolMessage(b"\x01")
         record_header = TlsRecordHeader(TlsRecordTypeByte.CHANGE_CIPHER_SPEC, tls_version, ccs_message.size)
         return TlsChangeCipherSpecRecord(record_header, [ccs_message])
 

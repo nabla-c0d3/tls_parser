@@ -6,7 +6,6 @@ from typing import Tuple
 
 
 class TlsRecordParser(object):
-
     @staticmethod
     def parse_bytes(raw_bytes):
         # type: (bytes) -> Tuple[TlsRecord, int]

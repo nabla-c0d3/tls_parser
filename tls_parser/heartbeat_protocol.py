@@ -14,7 +14,6 @@ class TlsHeartbeatTypeByte(IntEnum):
 
 
 class TlsHeartbeatMessage(TlsSubprotocolMessage):
-
     def __init__(self, hearbeat_type, heartbeat_data):
         # type: (TlsHeartbeatTypeByte, bytes) -> None
         self.type = hearbeat_type
@@ -27,11 +26,11 @@ class TlsHeartbeatMessage(TlsSubprotocolMessage):
 
     def to_bytes(self):
         # type: () -> bytes
-        bytes = b''
+        bytes = b""
         # Heartbeat message type - 1 byte
-        bytes += struct.pack('B', self.type.value)
+        bytes += struct.pack("B", self.type.value)
         # Heartbeat message length - 2 bytes
-        bytes += struct.pack('!H', len(self.data))
+        bytes += struct.pack("!H", len(self.data))
         # Heartbead message data
         bytes += self.data
         # Padding is not handled
