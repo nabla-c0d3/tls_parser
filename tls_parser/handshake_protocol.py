@@ -57,6 +57,9 @@ class TlsHandshakeRecord(TlsRecord):
     def __init__(self, record_header: TlsRecordHeader, handshake_messages: Sequence[TlsHandshakeMessage]) -> None:
         super().__init__(record_header=record_header, subprotocol_messages=handshake_messages)
 
+        # TODO(AD): Fix the interface instead of using an annotation
+        self.subprotocol_messages: Sequence[TlsHandshakeMessage]
+
     @classmethod
     def from_bytes(cls, raw_bytes: bytes) -> Tuple["TlsHandshakeRecord", int]:
         header, len_consumed_for_header = TlsRecordHeader.from_bytes(raw_bytes)
