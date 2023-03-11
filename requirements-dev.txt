@@ -1,0 +1,6 @@
+mypy==1.0.1
+flake8
+invoke>=2,<3
+black==23.1.0
+pytest==7.2.2
+pytest-cov

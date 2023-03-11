@@ -25,8 +25,7 @@ class TlsHandshakeTypeByte(IntEnum):
 
 
 class TlsHandshakeMessage(TlsSubprotocolMessage):
-    """The payload of a handshake record.
-    """
+    """The payload of a handshake record."""
 
     def __init__(self, handshake_type: TlsHandshakeTypeByte, handshake_data: bytes) -> None:
         # Recreate the raw message as bytes

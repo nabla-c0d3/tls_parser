@@ -2,8 +2,7 @@ from invoke import task, Context
 
 
 @task
-def test(ctx):
-    # type: (Context) -> None
+def test(ctx: Context) -> None:
     # Run linters
     ctx.run("flake8 tls_parser tests")
     ctx.run("mypy tls_parser tests")
