@@ -1,4 +1,4 @@
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __author__ = "Alban Diquet"
 __email__ = "nabla.c0d3@gmail.com"
 
