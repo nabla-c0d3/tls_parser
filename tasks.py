@@ -10,3 +10,9 @@ def test(ctx: Context) -> None:
 
     # Run the test suite
     ctx.run("pytest --cov=tls_parser --cov-fail-under 80")
+
+
+@task
+def release(ctx: Context) -> None:
+    ctx.run("python setup.py sdist bdist_wheel")
+    ctx.run("python -m twine upload .\dist\*")
