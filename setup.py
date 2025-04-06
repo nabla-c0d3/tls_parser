@@ -11,5 +11,5 @@ setup(
     author_email=__email__,
     url="https://github.com/nabla-c0d3/tls_parser",
     packages=["tls_parser"],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )
