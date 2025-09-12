@@ -10,6 +10,16 @@ setup(
     author=__author__,
     author_email=__email__,
     url="https://github.com/nabla-c0d3/tls_parser",
+    classifiers=[
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+    ],
     packages=["tls_parser"],
     python_requires=">=3.8",
 )
